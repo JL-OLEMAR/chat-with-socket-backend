@@ -1,6 +1,7 @@
 const { response } = require('express')
 const bcrypt = require('bcryptjs')
 const Usuario = require('../models/usuario')
+const { generarJWT } = require('../helpers/jwt')
 
 const crearUsuario = async (req, res = response) => {
   try {
@@ -23,8 +24,13 @@ const crearUsuario = async (req, res = response) => {
     // Guardar usuario en DB
     await usuario.save()
 
+    // Generar el JWT
+    const token = await generarJWT(usuario.id)
+
     res.json({
-      usuario
+      ok: true,
+      usuario,
+      token
     })
   } catch (error) {
     console.log(error)
@@ -38,12 +44,40 @@ const crearUsuario = async (req, res = response) => {
 const login = async (req, res = response) => {
   const { email, password } = req.body
 
-  res.json({
-    ok: true,
-    msg: 'login',
-    email,
-    password
-  })
+  try {
+    // Verificar si existe el correo
+    const usuarioDB = await Usuario.findOne({ email })
+    if (!usuarioDB) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'Email no encontrado'
+      })
+    }
+
+    // Validar el password
+    const validarPassword = bcrypt.compareSync(password, usuarioDB.password)
+    if (!validarPassword) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'La contraseña no es correcta'
+      })
+    }
+
+    // Generar el JWT
+    const token = await generarJWT(usuarioDB.id)
+
+    res.json({
+      ok: true,
+      usuario: usuarioDB,
+      token
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      ok: false,
+      msg: 'Hable con el administrador'
+    })
+  }
 }
 
 const renewToken = async (req, res = response) => {
