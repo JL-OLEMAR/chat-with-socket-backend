@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 
 /*
     ojo: NO poner en el JWT información valiosa del usuario
-    solo la necesaria
+    solo el campo necesario a identificarlo
 */
 const generarJWT = (uid) => {
   return new Promise((resolve, reject) => {
