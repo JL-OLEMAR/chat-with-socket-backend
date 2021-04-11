@@ -8,6 +8,7 @@ const { validarCampos } = require('../middlewares/validar-campos')
 const { validarJWT } = require('../middlewares/validar-jwt')
 const router = Router()
 
+// Registro
 router.post('/new', [
   check('nombre', 'El nombre es obligatorio').not().isEmpty(),
   check('email', 'El email es obligatorio').isEmail(),
