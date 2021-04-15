@@ -1,4 +1,9 @@
-const { usuarioConectado, usuarioDesconectado, getUsuarios } = require('../controllers/sockets')
+const {
+  getUsuarios,
+  grabarMensaje,
+  usuarioConectado,
+  usuarioDesconectado
+} = require('../controllers/sockets')
 const { comprobarJWT } = require('../helpers/jwt')
 
 class Sockets {
@@ -20,6 +25,9 @@ class Sockets {
 
       await usuarioConectado(uid)
 
+      // Unir al usuario una sala de socket.io
+      socket.join(uid)
+
       // TODO: Validar el JWT
       // Si el token no es válido, desconectar
 
@@ -32,6 +40,10 @@ class Sockets {
 
       // TODO: Escuchar cuando el cliente manda un mensaje
       // mensaje-personal
+      socket.on('mensaje-personal', async (payload) => {
+        const mensaje = await grabarMensaje(payload)
+        console.log(mensaje)
+      })
 
       // TODO: disconnect
       // Marcar en la DB que el usuario se desconecto
